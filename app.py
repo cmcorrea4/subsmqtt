@@ -15,7 +15,7 @@ mqtt_client.connect("157.230.214.127", 1883)
 
 # Define a function to handle incoming MQTT messages
 def on_message(client, userdata, msg):
-    st.write(f'Message received:  {message.payload}')
+    st.write(f'Message received:  {msg.payload}')
 
         
 # Set the function to handle incoming messages
