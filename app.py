@@ -1,43 +1,38 @@
-import paho.mqtt.client as mqtt
-import time
+import json
 import streamlit as st
+from paho.mqtt import client as mqtt
 
-# Callback function on connection
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        st.write("Connected to broker")
-        global Connected
-        Connected = True
-    else:
-        st.write("Connection failed")
 
-# Callback function on receive message
-def on_message(client, userdata, message):
+
+# Create a line chart
+my_chart = st.line_chart([0.])
+
+# Initialize MQTT client
+mqtt_client = mqtt.Client()
+
+# Connect to MQTT broker
+mqtt_client.connect("157.230.214.127", 1883)
+
+# Define a function to handle incoming MQTT messages
+def on_message(client, userdata, msg):
     st.write(f'Message received:  {message.payload}')
 
-Connected = False
+        
+# Set the function to handle incoming messages
+mqtt_client.on_message = on_message
 
-broker_address = '157.230.214.127'
-port = 1883
 
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
+# Create a "Start subscription" button
+if st.button("Start subscription"):
+    mqtt_client.subscribe("Sensores")
+    mqtt_client.loop_forever()
 
-client.connect(broker_address, port=port)
-
-client.loop_start()  # start MQTT client
-
-while Connected != True:  # Wait for connection
-    time.sleep(0.2)
-
-client.subscribe('Sensores')  # Subscribe to topic
-client.publish("Sensores", "Hello from Streamlit")  # Publish message
-
-try:
-    while True:
-        time.sleep(1)
-except KeyboardInterrupt:
-    st.write("Disconnected")
-    client.disconnect()
-    client.loop_stop()
+# Create a "Stop subscription" button
+if st.button("Stop subscription"):
+    mqtt_client.disconnect()
+	# Tried with loop_stop() as well, same issue
+	#mqtt_client.loop_stop()
+	
+    
+if st.button("dummy"):
+    pass
