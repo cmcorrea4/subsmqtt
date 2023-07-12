@@ -1,29 +1,43 @@
-import streamlit as st
-import time
-
 import paho.mqtt.client as mqtt
+import time
+import streamlit as st
 
+# Callback function on connection
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
-    client.subscribe("Sensores")
+    if rc == 0:
+        st.write("Connected to broker")
+        global Connected
+        Connected = True
+    else:
+        st.write("Connection failed")
 
-def on_message(client, userdata, msg):
-    st.write(msg.topic+" "+str(msg.payload))
+# Callback function on receive message
+def on_message(client, userdata, message):
+    st.write(f'Message received:  {message.payload}')
 
-def main():
-    st.title("MQTT subscriber")
+Connected = False
 
-    client = mqtt.Client()
-    client.on_connect = on_connect
-    client.on_message = on_message
+broker_address = 'broker.hivemq.com'
+port = 1883
 
-    client.connect("157.230.214.127", 1883, 60)
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
 
+client.connect(broker_address, port=port)
+
+client.loop_start()  # start MQTT client
+
+while Connected != True:  # Wait for connection
+    time.sleep(0.2)
+
+client.subscribe('Sensores')  # Subscribe to topic
+client.publish("Sensores", "Hello from Streamlit")  # Publish message
+
+try:
     while True:
-        client.loop_start()
         time.sleep(1)
-
-    st.button("Close")
-
-if __name__ == "__main__":
-    main()
+except KeyboardInterrupt:
+    st.write("Disconnected")
+    client.disconnect()
+    client.loop_stop()
