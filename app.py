@@ -17,7 +17,7 @@ def on_message(client, userdata, message):
 
 Connected = False
 
-broker_address = 'broker.hivemq.com'
+broker_address = '157.230.214.127'
 port = 1883
 
 client = mqtt.Client()
