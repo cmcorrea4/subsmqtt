@@ -4,8 +4,6 @@ from paho.mqtt import client as mqtt
 
 
 
-# Create a line chart
-my_chart = st.line_chart([0.])
 
 # Initialize MQTT client
 mqtt_client = mqtt.Client()
